@@ -1,11 +1,8 @@
 package com.nur.project.verticle;
-
 import java.util.HashSet;
 import java.util.Set;
-
 import com.nur.project.controller.FileController;
 import com.nur.project.model.File;
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
@@ -41,13 +38,13 @@ public class ServerVerticle extends AbstractVerticle {
         allowedMethods.add(HttpMethod.DELETE);
 
 
+
         router.route().handler(CorsHandler.create("*").allowedHeaders(allowedHeaders).allowedMethods(allowedMethods));
         router.route().handler(new BodyHandlerImpl());
         router.route("/api/*").handler(BodyHandler.create());
-
         router.post("/api/file").handler(this::addFile);
-
-
+      //router.get("/api/file").handler(this::getFile);
+        
 
 
         vertx.createHttpServer().requestHandler(router).listen(8080,ar ->{
@@ -62,8 +59,7 @@ public class ServerVerticle extends AbstractVerticle {
         File file = Json.decodeValue(routingContext.getBodyAsJson().toBuffer(),File.class);
         this.fileController.addFile(1L, file).onComplete(ar -> {
             if(ar.succeeded()){
-                routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result());
-            
+                routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
             }
             if(ar.failed()){
                 routingContext.response().end(Json.encodePrettily(ar.cause()));
