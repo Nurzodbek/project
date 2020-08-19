@@ -125,6 +125,11 @@ public class ServerVerticle extends AbstractVerticle {
 
     private void getEmail(RoutingContext routingContext){
         Long emailId = Long.parseLong(routingContext.request().getParam("id"));
-        
+        this.emailController.getEmail(1L, emailId).onComplete(ar -> {
+            if(ar.succeeded())
+                routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
+            else
+                routingContext.response().end(Json.encodePrettily(ar.cause()));
+        });
     }
 }
