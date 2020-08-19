@@ -1,6 +1,6 @@
 package com.nur.project.controller;
 
-import com.nur.project.controller.FilePgClient;
+// import com.nur.project.controller.FilePgClient;
 import com.nur.project.model.File;
 
 import io.vertx.core.Future;
@@ -18,5 +18,17 @@ public class FileController {
 
     public Future<Long> addFile(Long loginId,File file){
         return filePgClient.addFileCommand(loginId, file);
+    }
+
+    public Future<File> getFile(Long loginId,Long fileId){
+        return  filePgClient.getFileCommand(loginId, fileId);
+    }
+
+    public Future<Long> updateFile(Long loginId,File file){
+        return filePgClient.updateFileCommand(loginId, file);
+    }
+
+    public Future<Long> deleteFile(Long loginId,Long fileId){
+        return filePgClient.deleteFileCommand(loginId, fileId);
     }
 }

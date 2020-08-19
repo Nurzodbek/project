@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS registration.file(
-    file_id BIGSERIAL NOT NULL;
+    file_id BIGSERIAL NOT NULL,
     CONSTRAINT pc_registration_file_file_id PRIMARY KEY (file_id)
 );
 ALTER TABLE registration.file

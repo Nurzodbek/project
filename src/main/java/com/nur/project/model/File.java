@@ -21,6 +21,9 @@ public class File {
         this.mimeType = mimeType;
     }
 
+    public File() {
+    } 
+
     public Long getFileId() {
         return fileId;
     }
@@ -56,7 +59,7 @@ public class File {
     public String getDescription() {
         return description;
     }
-
+    
     public void setDescription(String description) {
         this.description = description;
     }
@@ -76,6 +79,8 @@ public class File {
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
+
+    
 
     
     
