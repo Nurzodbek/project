@@ -3,6 +3,7 @@ package com.nur.project.model;
 public class Email {
     private Long emailId;
     private String emailAddress;
+    
 
     public Email() {
     }

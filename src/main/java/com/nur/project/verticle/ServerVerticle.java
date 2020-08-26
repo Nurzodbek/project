@@ -51,14 +51,19 @@ public class ServerVerticle extends AbstractVerticle {
         
         
         
-        
-        
         router.post("/api/file").handler(this::addFile);
         router.get("/api/file/:id").handler(this::getFile);
         router.put("/api/file/:id").handler(this::updateFile);
         router.delete("/api/file/:id").handler(this::deleteFile);
 
 
+        router.post("/api/email").handler(this::addEmail);
+        router.get("/api/email/:id").handler(this::getEmail);
+        router.put("/api/email/:id").handler(this::updateEmail);
+        router.delete("/api/email/:id").handler(this::deleteEmail);
+
+
+        
         vertx.createHttpServer().requestHandler(router).listen(8080,ar ->{
             if(ar.succeeded())
                 System.out.println("Listen 8080 port");
@@ -122,10 +127,31 @@ public class ServerVerticle extends AbstractVerticle {
                 routingContext.response().end(Json.encodePrettily(ar.cause()));
         });
     }
-
+    
     private void getEmail(RoutingContext routingContext){
         Long emailId = Long.parseLong(routingContext.request().getParam("id"));
         this.emailController.getEmail(1L, emailId).onComplete(ar -> {
+            if(ar.succeeded())
+                routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
+            else
+                routingContext.response().end(Json.encodePrettily(ar.cause()));
+        });
+    }
+
+    private void updateEmail(RoutingContext routingContext){
+        Email email = Json.decodeValue(routingContext.getBodyAsJson().toBuffer(),Email.class);
+        email.setEmailId(Long.parseLong(routingContext.request().getParam("id")));
+        this.emailController.updateEmail(1L, email).onComplete(ar ->{
+            if(ar.succeeded())
+                routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
+            else
+                routingContext.response().end(Json.encodePrettily(ar.cause()));    
+        });    
+    }
+
+    private void deleteEmail(RoutingContext routingContext){
+        Long emailId = Long.parseLong(routingContext.request().getParam("id"));
+        this.emailController.deleteEmail(1L, emailId).onComplete(ar -> {
             if(ar.succeeded())
                 routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
             else
