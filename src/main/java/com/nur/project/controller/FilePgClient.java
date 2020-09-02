@@ -34,7 +34,6 @@ public class FilePgClient {
     
     public Future<Long> addFileCommand(Long loginId , File file){
         Promise<Long> promise = Promise.promise();
-
         pgPool.preparedQuery("SELECT file_add AS file_id FROM registration.file_add($1, $2, $3, $4, $5, $6, $7);")
         .execute(Tuple.of(loginId, file.getName(),file.getDisplayName(),file.getUniqueName(),file.getDescription(),file.getSize(),file.getMimeType()), ar-> {
             if(ar.succeeded()){

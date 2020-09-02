@@ -1,16 +1,12 @@
-CREATE OR REPLACE FUNCTION registration.file_add(
+CREATE OR REPLACE FUNCTION registration.email_file_add(
     in_login_id BIGINT,
-    in_name TEXT,
-    in_display_name TEXT,
-    in_unique_name TEXT,
-    in_description TEXT,
-    in_size BIGINT,
-    in_mime_type TEXT
+    in_email_id BIGINT,
+    in_file_id BIGINT
 )
 RETURNS BIGINT
 AS $$
 
- DECLARE FN_NAME CONSTANT TEXT :='registration.file_add';
+ DECLARE FN_NAME CONSTANT TEXT :='registration.email_file_add';
  STEP_INDEX INT;
  STEP_DESC VARCHAR(500);
  result BIGINT;
@@ -29,27 +25,19 @@ AS $$
  STEP_DESC := FN_NAME || ' : Select data';
  RAISE NOTICE '%',STEP_DESC;
 
- INSERT INTO registration.file(
-     name,
-     display_name,
-     unique_name,
-     description,
-     size,
-     mime_type,
+ INSERT INTO registration.email_file(
+     email_id,
+     file_id,
      created_by,
      deleted
  )
  VALUES(
-     in_name,
-     in_display_name,
-     in_unique_name,
-     in_description,
-     in_size,
-     in_mime_type,
+     in_email_id,
+     in_file_id,
      in_login_id,
      FALSE
  )
- RETURNING file_id INTO result;
+ RETURNING email_file_id INTO result;
  RETURN result;
 
  END;

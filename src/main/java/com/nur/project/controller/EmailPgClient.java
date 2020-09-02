@@ -34,7 +34,6 @@ public class EmailPgClient {
     
     public Future<Long> addEmailCommand(Long loginId,Email email){
         Promise<Long> promise = Promise.promise();
-
         pgPool.preparedQuery("SELECT email_add AS email_id FROM registration.email_add($1,$2);")
         .execute(Tuple.of(loginId, email.getEmailAddress()), ar ->{
             if(ar.succeeded()){
@@ -51,7 +50,8 @@ public class EmailPgClient {
 
     public Future<Email> getEmailCommand(Long loginId, Long emailId){
         Promise<Email> promise = Promise.promise();
-        pgPool.preparedQuery("SELECT * FROM registration.email_get($1,$2);").execute(Tuple.of(loginId, emailId),
+        pgPool.preparedQuery("SELECT * FROM registration.email_get($1,$2);")
+        .execute(Tuple.of(loginId, emailId),
             ar ->{
                     if (ar.succeeded()){
                         System.out.println("Get "+ar.result().size() + " rows");

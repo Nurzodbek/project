@@ -3,8 +3,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.nur.project.controller.EmailController;
+import com.nur.project.controller.EmailFileController;
 import com.nur.project.controller.FileController;
 import com.nur.project.model.Email;
+import com.nur.project.model.EmailFile;
 import com.nur.project.model.File;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -19,13 +21,13 @@ import io.vertx.ext.web.handler.impl.BodyHandlerImpl;
 public class ServerVerticle extends AbstractVerticle {
     private FileController fileController;
     private EmailController emailController;
-
+    private EmailFileController emailFileController;
 
     @Override
     public void start(Future<Void> future) throws Exception {
         this.fileController = new FileController(vertx);
         this.emailController = new EmailController(vertx);
-
+        this.emailFileController = new EmailFileController(vertx);
         Router router = Router.router(vertx);
 
         Set<String> allowedHeaders = new HashSet<>();
@@ -62,7 +64,10 @@ public class ServerVerticle extends AbstractVerticle {
         router.put("/api/email/:id").handler(this::updateEmail);
         router.delete("/api/email/:id").handler(this::deleteEmail);
 
-
+        router.post("/api/emailFile").handler(this::addEmailFile);
+        router.get("/api/emailFile/:id").handler(this::getEmailFile);
+        router.put("/api/emailFile/:id").handler(this::updateEmailFile);
+        router.delete("/api/emailFile/:id").handler(this::deleteEmailFile);
         
         vertx.createHttpServer().requestHandler(router).listen(8080,ar ->{
             if(ar.succeeded())
@@ -158,4 +163,48 @@ public class ServerVerticle extends AbstractVerticle {
                 routingContext.response().end(Json.encodePrettily(ar.cause()));
         });
     }
+
+    private void addEmailFile(RoutingContext routingContext){
+        EmailFile emailFile = Json.decodeValue(routingContext.getBodyAsJson().toBuffer(),EmailFile.class);
+        this.emailFileController.addEmailFile(1L, emailFile).onComplete(ar ->{
+            if(ar.succeeded()){
+                routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
+            }    
+            if(ar.failed()){
+                routingContext.response().end(Json.encodePrettily(ar.cause()));    
+            }
+        });
+    }
+
+    private void getEmailFile(RoutingContext routingContext){
+        Long emailFileId = Long.parseLong(routingContext.request().getParam("id"));
+        this.emailFileController.getEmailFile(1L, emailFileId).onComplete(ar ->{
+            if(ar.succeeded())
+                routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
+            else
+                routingContext.response().end(Json.encodePrettily(ar.cause()));    
+            });
+    }
+    
+    private void updateEmailFile(RoutingContext rc){
+       EmailFile emailFile = Json.decodeValue(rc.getBodyAsJson().toBuffer(),EmailFile.class);
+       emailFile.setEmailFileId(Long.parseLong(rc.request().getParam("id")));
+       this.emailFileController.updateEmailFile(1L, emailFile).onComplete(ar ->{
+            if(ar.succeeded())
+                rc.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
+            else
+                rc.response().end(Json.encodePrettily(ar.cause()));
+       });
+    }
+
+    private void deleteEmailFile(RoutingContext rc){
+        Long emailFileId = Long.parseLong(rc.request().getParam("id"));
+        this.emailFileController.deleteEmailFile(1L, emailFileId).onComplete(ar ->{
+            if(ar.succeeded())
+                rc.response().setStatusCode(201).end(Json.encodePrettily(ar.result())); 
+            else
+                rc.response().end(Json.encodePrettily(ar.cause())); 
+        });
+    }
+
 }
