@@ -47,6 +47,7 @@ public class EmailPgClient {
         return promise.future();
     }
 
+    
 
     public Future<Email> getEmailCommand(Long loginId, Long emailId){
         Promise<Email> promise = Promise.promise();
@@ -69,6 +70,7 @@ public class EmailPgClient {
             });
         return promise.future();
     }
+
 
     private Email createEmailRows(Row row){
         Email email = new Email();

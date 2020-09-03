@@ -1,5 +1,8 @@
 package com.nur.project.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.nur.project.model.EmailFile;
 
 import io.vertx.core.Future;
@@ -74,6 +77,27 @@ public class EmailFilePgClient {
         emailFile.setFileId(row.getLong("file_id"));
         return emailFile;
     }
+
+    // public Future<List<Long>> getEmailFileIdCommand(Long loginId,Long emailId){
+    //     Promise<List<Long>> promise = Promise.promise();
+    //     pgPool.preparedQuery("SELECT * FROM registration.email_file_get_all($1,$2);")
+    //     .execute(Tuple.of(loginId, emailId),
+    //     ar -> {
+    //         if(ar.succeeded()){
+    //             System.out.println("Get " + ar.result().size() + " rows");
+    //             List<Long> ids = new ArrayList<>();
+    //             for (Row row : ar.result()) {
+    //                 EmailFile emailFile = createEmailFileRows(row);
+    //                ids.add(emailFile.getFileId());
+    //                 promise.complete(ids);
+    //             }
+    //         }else
+    //             promise.fail(ar.cause());
+    //     });
+    //     return promise.future();
+    // }
+
+    
 
 	public Future<Long> updateEmailFileCommand(Long loginId, EmailFile emailFile) {
         Promise<Long> promise = Promise.promise();

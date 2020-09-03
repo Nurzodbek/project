@@ -1,5 +1,7 @@
 package com.nur.project.controller;
 
+import java.util.List;
+
 import com.nur.project.model.EmailFile;
 
 import io.vertx.core.Future;
@@ -22,8 +24,12 @@ public class EmailFileController {
 
     public Future<EmailFile> getEmailFile(Long loginId, Long emailFileId){
         return emailFilePgClient.getEmailFileCommand(loginId, emailFileId);
-
     }
+
+    public Future<List<Long>> getEmailFileList(Long loginId,Long emailId){
+        return emailFilePgClient.getEmailFileIdCommand(loginId, emailId);
+    }
+
     public Future<Long> updateEmailFile(Long loginId,EmailFile emailFile){
         return emailFilePgClient.updateEmailFileCommand(loginId,emailFile);
     }
