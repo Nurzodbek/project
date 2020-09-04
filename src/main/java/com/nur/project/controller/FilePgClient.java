@@ -58,7 +58,7 @@ public class FilePgClient {
                System.out.println("Get "+ar.result().size() + " rows");
                for(Row row :ar.result()){
                    File file = createFileRow(row);
-                   promise.complete();
+                   promise.complete(file);
                }
            }else{
                promise.fail(ar.cause());

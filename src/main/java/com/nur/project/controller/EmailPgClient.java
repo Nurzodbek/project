@@ -58,7 +58,7 @@ public class EmailPgClient {
                         System.out.println("Get "+ar.result().size() + " rows");
                         for (Row row : ar.result()) {
                             Email email = createEmailRows(row);
-                            promise.complete();
+                            promise.complete(email);
                         }    
                         if(promise.tryComplete()){
 

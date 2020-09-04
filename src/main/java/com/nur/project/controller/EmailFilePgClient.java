@@ -78,24 +78,26 @@ public class EmailFilePgClient {
         return emailFile;
     }
 
-    // public Future<List<Long>> getEmailFileIdCommand(Long loginId,Long emailId){
-    //     Promise<List<Long>> promise = Promise.promise();
-    //     pgPool.preparedQuery("SELECT * FROM registration.email_file_get_all($1,$2);")
-    //     .execute(Tuple.of(loginId, emailId),
-    //     ar -> {
-    //         if(ar.succeeded()){
-    //             System.out.println("Get " + ar.result().size() + " rows");
-    //             List<Long> ids = new ArrayList<>();
-    //             for (Row row : ar.result()) {
-    //                 EmailFile emailFile = createEmailFileRows(row);
-    //                ids.add(emailFile.getFileId());
-    //                 promise.complete(ids);
-    //             }
-    //         }else
-    //             promise.fail(ar.cause());
-    //     });
-    //     return promise.future();
-    // }
+    public Future<List<Long>> getEmailFileIdCommand(Long loginId,Long emailId){
+        Promise<List<Long>> promise = Promise.promise();
+        pgPool.preparedQuery("SELECT * FROM registration.email_file_getid($1,$2);")
+        .execute(Tuple.of(loginId, emailId),
+        ar -> {
+            if(ar.succeeded()){
+                System.out.println("Get " + ar.result().size() + " rows");
+                ArrayList<Long> ids = new ArrayList<Long>();
+                for (Row row : ar.result()) {
+                    EmailFile emailFile = createEmailFileRows(row);
+                    ids.add(emailFile.getFileId());
+                }
+                System.out.println(ids);
+                promise.complete(ids);
+            }else{
+                promise.fail(ar.cause());
+                }   
+            });
+        return promise.future();
+    }
 
     
 
