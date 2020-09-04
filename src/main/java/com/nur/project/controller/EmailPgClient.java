@@ -21,7 +21,7 @@ public class EmailPgClient {
         .setDatabase("File")
         .setUser("File")
         .setPassword("123");
-        
+
         PoolOptions poolOptions = new PoolOptions().setMaxSize(5);
 
         this.pgPool = PgPool.pool(vertx,pgConnectOptions ,poolOptions);
@@ -31,7 +31,7 @@ public class EmailPgClient {
     public EmailPgClient() {
     }
 
-    
+
     public Future<Long> addEmailCommand(Long loginId,Email email){
         Promise<Long> promise = Promise.promise();
         pgPool.preparedQuery("SELECT email_add AS email_id FROM registration.email_add($1,$2);")
@@ -47,7 +47,7 @@ public class EmailPgClient {
         return promise.future();
     }
 
-    
+
 
     public Future<Email> getEmailCommand(Long loginId, Long emailId){
         Promise<Email> promise = Promise.promise();
@@ -58,15 +58,15 @@ public class EmailPgClient {
                         System.out.println("Get "+ar.result().size() + " rows");
                         for (Row row : ar.result()) {
                             Email email = createEmailRows(row);
-                            promise.complete();
-                        }    
+                            promise.complete(email);
+                        }
                         if(promise.tryComplete()){
 
                         }
                     }else
                         promise.fail(ar.cause());
-        
-                
+
+
             });
         return promise.future();
     }
@@ -76,7 +76,7 @@ public class EmailPgClient {
         Email email = new Email();
         email.setEmailId(row.getLong("email_id"));
         email.setEmailAddress(row.getString("email_address"));
-        return email;   
+        return email;
     }
 
     public Future<Long> updateEmailCommand(Long loginId,Email email){
@@ -91,8 +91,8 @@ public class EmailPgClient {
                 }else
                     promise.fail(ar.cause());
             });
-        
-        
+
+
         return promise.future();
     }
 

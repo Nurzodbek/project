@@ -26,7 +26,7 @@ public class EmailFilePgClient {
         .setPassword("123");
 
         PoolOptions poolOptions = new PoolOptions().setMaxSize(5);
-        
+
         this.pgPool = PgPool.pool(vertx,pgConnectOptions,poolOptions);
     }
 
@@ -58,7 +58,7 @@ public class EmailFilePgClient {
                     System.out.println("Get " +ar.result().size() + " rows");
                     for (Row row : ar.result()){
                         EmailFile emailFile = createEmailFileRows(row);
-                        promise.complete();
+                        promise.complete(emailFile);
                     }
                     if(promise.tryComplete()){
 
@@ -66,7 +66,7 @@ public class EmailFilePgClient {
                 }else
                     promise.fail(ar.cause());
         });
-        
+
         return promise.future();
     }
 
@@ -78,26 +78,26 @@ public class EmailFilePgClient {
         return emailFile;
     }
 
-    // public Future<List<Long>> getEmailFileIdCommand(Long loginId,Long emailId){
-    //     Promise<List<Long>> promise = Promise.promise();
-    //     pgPool.preparedQuery("SELECT * FROM registration.email_file_get_all($1,$2);")
-    //     .execute(Tuple.of(loginId, emailId),
-    //     ar -> {
-    //         if(ar.succeeded()){
-    //             System.out.println("Get " + ar.result().size() + " rows");
-    //             List<Long> ids = new ArrayList<>();
-    //             for (Row row : ar.result()) {
-    //                 EmailFile emailFile = createEmailFileRows(row);
-    //                ids.add(emailFile.getFileId());
-    //                 promise.complete(ids);
-    //             }
-    //         }else
-    //             promise.fail(ar.cause());
-    //     });
-    //     return promise.future();
-    // }
+     public Future<List<Long>> getEmailFileIdCommand(Long loginId,Long emailId){
+         Promise<List<Long>> promise = Promise.promise();
+         pgPool.preparedQuery("SELECT * FROM registration.email_file_get_all($1,$2);")
+         .execute(Tuple.of(loginId, emailId),
+         ar -> {
+             if(ar.succeeded()){
+                 System.out.println("Get " + ar.result().size() + " rows");
+                 List<Long> ids = new ArrayList<>();
+                 for (Row row : ar.result()) {
+                     EmailFile emailFile = createEmailFileRows(row);
+                    ids.add(emailFile.getFileId());
+                     promise.complete(ids);
+                 }
+             }else
+                 promise.fail(ar.cause());
+         });
+         return promise.future();
+     }
 
-    
+
 
 	public Future<Long> updateEmailFileCommand(Long loginId, EmailFile emailFile) {
         Promise<Long> promise = Promise.promise();
@@ -113,7 +113,7 @@ public class EmailFilePgClient {
         });
         return promise.future();
     }
-    
+
 
     public Future<Long> deleteEmailFileCommand(Long loginId,Long emailFileId){
         Promise<Long> promise = Promise.promise();
@@ -132,7 +132,7 @@ public class EmailFilePgClient {
     }
 
 
-}    
+}
 
 
 

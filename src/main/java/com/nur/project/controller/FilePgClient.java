@@ -25,13 +25,13 @@ public class FilePgClient {
         PoolOptions poolOptions = new PoolOptions().setMaxSize(5);
 
         this.pgPool = PgPool.pool(vertx,connectOptions,poolOptions);
-    
+
     }
 
     public FilePgClient() {
     }
 
-    
+
     public Future<Long> addFileCommand(Long loginId , File file){
         Promise<Long> promise = Promise.promise();
         pgPool.preparedQuery("SELECT file_add AS file_id FROM registration.file_add($1, $2, $3, $4, $5, $6, $7);")
@@ -58,11 +58,11 @@ public class FilePgClient {
                System.out.println("Get "+ar.result().size() + " rows");
                for(Row row :ar.result()){
                    File file = createFileRow(row);
-                   promise.complete();
+                   promise.complete(file);
                }
            }else{
                promise.fail(ar.cause());
-           } 
+           }
         });
         return promise.future();
     }
