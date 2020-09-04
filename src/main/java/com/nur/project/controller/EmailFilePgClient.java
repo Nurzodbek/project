@@ -1,10 +1,6 @@
 package com.nur.project.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.nur.project.model.EmailFile;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -14,127 +10,128 @@ import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EmailFilePgClient {
-    private PgPool pgPool;
+  private PgPool pgPool;
 
-    public EmailFilePgClient(Vertx vertx){
-        PgConnectOptions pgConnectOptions = new PgConnectOptions()
-        .setPort(5432)
-        .setHost("localhost")
-        .setDatabase("File")
-        .setUser("File")
-        .setPassword("123");
+  public EmailFilePgClient(Vertx vertx) {
+    PgConnectOptions pgConnectOptions = new PgConnectOptions()
+      .setPort(5432)
+      .setHost("localhost")
+      .setDatabase("File")
+      .setUser("File")
+      .setPassword("123");
 
-        PoolOptions poolOptions = new PoolOptions().setMaxSize(5);
+    PoolOptions poolOptions = new PoolOptions().setMaxSize(5);
 
-        this.pgPool = PgPool.pool(vertx,pgConnectOptions,poolOptions);
-    }
+    this.pgPool = PgPool.pool(vertx, pgConnectOptions, poolOptions);
+  }
 
-    public EmailFilePgClient() {
-    }
+  public EmailFilePgClient() {
+  }
 
-    public Future<Long> addEmailFileCommand(Long loginId,EmailFile emailFile){
-        Promise<Long> promise = Promise.promise();
-        pgPool.preparedQuery("SELECT email_file_add AS email_file_id FROM registration.email_file_add($1,$2,$3);")
-        .execute(Tuple.of(loginId, emailFile.getEmailId(),emailFile.getFileId()), ar ->{
-            if(ar.succeeded()){
-                System.out.println("Got " + ar.result().size() + " rows");
-                for (Row row : ar.result()) {
-                    promise.complete(row.getLong("email_file_id"));
-                }
-            }else
-                    promise.fail(ar.cause());
-        });
-        return promise.future();
-    }
-
-
-    public Future<EmailFile> getEmailFileCommand(Long loginId,Long emailFileId){
-        Promise<EmailFile> promise = Promise.promise();
-        pgPool.preparedQuery("SELECT * FROM registration.email_file_get($1,$2);")
-        .execute(Tuple.of(loginId, emailFileId),
-            ar -> {
-                if(ar.succeeded()){
-                    System.out.println("Get " +ar.result().size() + " rows");
-                    for (Row row : ar.result()){
-                        EmailFile emailFile = createEmailFileRows(row);
-                        promise.complete(emailFile);
-                    }
-                    if(promise.tryComplete()){
-
-                    }
-                }else
-                    promise.fail(ar.cause());
-        });
-
-        return promise.future();
-    }
-
-    private EmailFile createEmailFileRows(Row row){
-        EmailFile emailFile = new EmailFile();
-        emailFile.setEmailFileId(row.getLong("email_file_id"));
-        emailFile.setEmailId(row.getLong("email_id"));
-        emailFile.setFileId(row.getLong("file_id"));
-        return emailFile;
-    }
-
-     public Future<List<Long>> getEmailFileIdCommand(Long loginId,Long emailId){
-         Promise<List<Long>> promise = Promise.promise();
-         pgPool.preparedQuery("SELECT * FROM registration.email_file_get_all($1,$2);")
-         .execute(Tuple.of(loginId, emailId),
-         ar -> {
-             if(ar.succeeded()){
-                 System.out.println("Get " + ar.result().size() + " rows");
-                 List<Long> ids = new ArrayList<>();
-                 for (Row row : ar.result()) {
-                     EmailFile emailFile = createEmailFileRows(row);
-                    ids.add(emailFile.getFileId());
-                     promise.complete(ids);
-                 }
-             }else
-                 promise.fail(ar.cause());
-         });
-         return promise.future();
-     }
+  public Future<Long> addEmailFileCommand(Long loginId, EmailFile emailFile) {
+    Promise<Long> promise = Promise.promise();
+    pgPool.preparedQuery("SELECT email_file_add AS email_file_id FROM registration.email_file_add($1,$2,$3);")
+      .execute(Tuple.of(loginId, emailFile.getEmailId(), emailFile.getFileId()), ar -> {
+        if (ar.succeeded()) {
+          System.out.println("Got " + ar.result().size() + " rows");
+          for (Row row : ar.result()) {
+            promise.complete(row.getLong("email_file_id"));
+          }
+        } else
+          promise.fail(ar.cause());
+      });
+    return promise.future();
+  }
 
 
+  public Future<EmailFile> getEmailFileCommand(Long loginId, Long emailFileId) {
+    Promise<EmailFile> promise = Promise.promise();
+    pgPool.preparedQuery("SELECT * FROM registration.email_file_get($1,$2);")
+      .execute(Tuple.of(loginId, emailFileId),
+        ar -> {
+          if (ar.succeeded()) {
+            System.out.println("Get " + ar.result().size() + " rows");
+            for (Row row : ar.result()) {
+              EmailFile emailFile = createEmailFileRows(row);
+              promise.complete(emailFile);
+            }
+            if (promise.tryComplete()) {
 
-	public Future<Long> updateEmailFileCommand(Long loginId, EmailFile emailFile) {
-        Promise<Long> promise = Promise.promise();
-        pgPool.preparedQuery("SELECT email_file_update AS email_file_id FROM registration.email_file_update($1,$2,$3,$4);")
-        .execute(Tuple.of(loginId,emailFile.getEmailFileId(),emailFile.getEmailId(),emailFile.getFileId()),ar ->{
-            if(ar.succeeded()){
-                System.out.println("Got " + ar.result().size() + " rows");
-                for (Row row : ar.result()) {
-                    promise.complete(row.getLong("email_file_id"));
-                }
-            }else
-                promise.fail(ar.cause());
-        });
-        return promise.future();
-    }
-
-
-    public Future<Long> deleteEmailFileCommand(Long loginId,Long emailFileId){
-        Promise<Long> promise = Promise.promise();
-        pgPool.preparedQuery("SELECT email_file_delete AS email_file_id FROM registration.email_file_delete($1,$2);")
-        .execute(Tuple.of(loginId, emailFileId), ar ->{
-            if(ar.succeeded()){
-                System.out.println("Got " +ar.result().size() + "rows");
-                for (Row row : ar.result()){
-                    promise.complete(row.getLong("email_file_id"));
-                }
-            }else
-                promise.fail(ar.cause());
+            }
+          } else
+            promise.fail(ar.cause());
         });
 
-        return promise.future();
-    }
+    return promise.future();
+  }
+
+  private EmailFile createEmailFileRows(Row row) {
+    EmailFile emailFile = new EmailFile();
+    emailFile.setEmailFileId(row.getLong("email_file_id"));
+    emailFile.setEmailId(row.getLong("email_id"));
+    emailFile.setFileId(row.getLong("file_id"));
+    return emailFile;
+  }
+
+  public Future<List<Long>> getEmailFileIdCommand(Long loginId, Long emailId) {
+    Promise<List<Long>> promise = Promise.promise();
+    pgPool.preparedQuery("SELECT * FROM registration.email_file_getid($1,$2);")
+      .execute(Tuple.of(loginId, emailId),
+        ar -> {
+          if (ar.succeeded()) {
+            System.out.println("Get " + ar.result().size() + " rows");
+            List<Long> ids = new ArrayList<Long>();
+            for (Row row : ar.result()) {
+              EmailFile emailFile = createEmailFileRows(row);
+              ids.add(emailFile.getFileId());
+            }
+            promise.complete(ids);
+          } else {
+            promise.fail(ar.cause());
+          }
+        });
+    return promise.future();
+  }
+
+
+  public Future<Long> updateEmailFileCommand(Long loginId, EmailFile emailFile) {
+    Promise<Long> promise = Promise.promise();
+    pgPool.preparedQuery("SELECT email_file_update AS email_file_id FROM registration.email_file_update($1,$2,$3,$4);")
+      .execute(Tuple.of(loginId, emailFile.getEmailFileId(), emailFile.getEmailId(), emailFile.getFileId()), ar -> {
+        if (ar.succeeded()) {
+          System.out.println("Got " + ar.result().size() + " rows");
+          for (Row row : ar.result()) {
+            promise.complete(row.getLong("email_file_id"));
+          }
+        } else
+          promise.fail(ar.cause());
+      });
+    return promise.future();
+  }
+
+
+  public Future<Long> deleteEmailFileCommand(Long loginId, Long emailFileId) {
+    Promise<Long> promise = Promise.promise();
+    pgPool.preparedQuery("SELECT email_file_delete AS email_file_id FROM registration.email_file_delete($1,$2);")
+      .execute(Tuple.of(loginId, emailFileId), ar -> {
+        if (ar.succeeded()) {
+          System.out.println("Got " + ar.result().size() + "rows");
+          for (Row row : ar.result()) {
+            promise.complete(row.getLong("email_file_id"));
+          }
+        } else
+          promise.fail(ar.cause());
+      });
+
+    return promise.future();
+  }
 
 
 }
-
-
 
 
 //private void addEmail(RoutingContext routingContext){

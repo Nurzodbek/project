@@ -1,9 +1,5 @@
 package com.nur.project.verticle;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.nur.project.controller.EmailController;
 import com.nur.project.controller.EmailFileController;
 import com.nur.project.controller.FileController;
@@ -19,6 +15,11 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.impl.BodyHandlerImpl;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ServerVerticle extends AbstractVerticle {
   private FileController fileController;
@@ -158,22 +159,33 @@ public class ServerVerticle extends AbstractVerticle {
 
   private void getEmail(RoutingContext routingContext) {
     Long emailId = Long.parseLong(routingContext.request().getParam("id"));
-    this.emailController.getEmail(1L, emailId).onComplete(ar -> {
-      if (ar.succeeded()) {
-        Long emailFileId = Long.parseLong(routingContext.request().getParam("id"));
-          this.emailFileController.getEmailFileList(1L, emailFileId).onComplete(ar1 ->{
-              if(ar1.succeeded()){
-                for(Long fileId: ar1.result()){
-                  this.fileController.getFile(1l, fileId).onComplete(ar2->{
-                    if(ar2.succeeded())
-                      routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar2.result()));
+    List<File> files = new ArrayList<>();
+
+
+        this.emailFileController.getEmailFileList(1l, emailId).onComplete(ar -> {
+          if (ar.succeeded()) {
+            for (Long i : ar.result()) {
+              this.fileController.getFile(1l, i).onComplete(ar2 -> {
+                if (ar2.succeeded()) {
+                  files.add(ar2.result());
+                  this.emailController.getEmail(1l, emailId).onComplete(ar3->{
+                    if (ar3.succeeded()) {
+
+                      ar3.result().setFiles(files);
+                      routingContext.response().end(Json.encodePrettily(ar3.result()));
+                    }
                   });
+                  } else {
+                  routingContext.response().end(Json.encodePrettily(ar2.cause()));
                 }
-              }
-              
-          routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));  });
-       }
-    });
+              });
+            }
+
+          } else {
+            routingContext.response().end(Json.encodePrettily(ar.cause()));
+          }
+        });
+
   }
 
   private void updateEmail(RoutingContext routingContext) {

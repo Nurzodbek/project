@@ -15,9 +15,11 @@ public class EmailController {
     public EmailController() {
     }
 
-     public Future<Long> addEmail(Long loginId , Email email){
+
+    public Future<Long> addEmail(Long loginId , Email email){
          return emailPgClient.addEmailCommand(1L, email);
      }
+
      public Future<Email> getEmail(Long loginId,Long emailId){
          return emailPgClient.getEmailCommand(loginId, emailId);
      }
