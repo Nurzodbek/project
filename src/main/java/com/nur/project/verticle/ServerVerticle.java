@@ -1,5 +1,7 @@
 package com.nur.project.verticle;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.nur.project.controller.EmailController;
@@ -147,9 +149,9 @@ public class ServerVerticle extends AbstractVerticle {
                                 EmailFile emailFile = new EmailFile(ar.result(), ar1.result());
                                 this.emailFileController.addEmailFile(1L, emailFile).onComplete(ar2 ->{
                                     if(ar2.succeeded()){
-                                        routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar2.result()));
+                                        routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
                                     }else{
-                                        routingContext.response().end(Json.encodePrettily(ar2.cause()));
+                                        routingContext.response().end(Json.encodePrettily(ar.cause()));
                                     }
                                 });
                             }
@@ -162,52 +164,33 @@ public class ServerVerticle extends AbstractVerticle {
 
 
     private void getEmail(RoutingContext routingContext) {
-    Long emailId = Long.parseLong(routingContext.request().getParam("id"));
-    this.emailController.getEmail(1l, emailId).onComplete( ar->{
-        if (ar.succeeded()) {
-            Long emailFileId = Long.parseLong(routingContext.request().getParam("id"));
-                this.emailFileController.getEmailFileList(1L, emailFileId).onComplete(ar1 -> {
-                    
-                        for(Long fileId: ar1.result()){
-                            
-                            this.fileController.getFile(1l, fileId).onComplete(ar2->{
-                                if(ar2.succeeded()){
-                                    routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar2.result()));
-                                }else{
-                                    routingContext.response().end(Json.encodePrettily(ar2.cause()));
+        Long emailId = Long.parseLong(routingContext.request().getParam("id"));
+        List<File> files = new ArrayList<>();
+        this.emailFileController.getEmailFileList(1L, emailId).onComplete(ar ->{
+            if(ar.succeeded()){
+                for (Long  fileId : ar.result()) {
+                    this.fileController.getFile(1L, fileId).onComplete(ar2 ->{
+                        if(ar2.succeeded()){
+                            files.add(ar2.result());
+                            this.emailController.getEmail(1L, emailId).onComplete(ar3 ->{
+                                if(ar3.succeeded()){
+                                    ar3.result().setFiles(files);
+                                    routingContext.response().end(Json.encodePrettily(ar3.result()));
                                 }
-                            });     
-                        
-                    }    
-                });
-                    routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
-        } else {
-                 routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.cause()));
+                            });
+                        }else{
+                            routingContext.response().end(Json.encodePrettily(ar2.cause()));
+                        }
+                    });
                 }
-    });
+            }else
+           {
+                routingContext.response().end(Json.encodePrettily(ar.cause()));
+            }
+        });
 
 
-    // this.emailController.getEmail(1L, emailId).onComplete(ar -> {
-
-    //   if (ar.succeeded()) {
-    //     // Long emailFileId = Long.parseLong(routingContext.request().getParam("id"));
-    //         this.emailFileController.getEmailFileList(1L, ar.result()).onComplete(ar1 ->{
-    //           if(ar1.succeeded()){
-    //               System.out.println(ar1.result());
-    //                 if(!ar1.result().isEmpty())
-    //                     for(Long fileId: ar1.result()){
-    //                         this.fileController.getFile(1l, fileId).onComplete(ar2->{
-    //                             if(ar2.succeeded())
-    //                                 routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar2.result()));
-    //                         });
-    //                     }
-    //           }                                    routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar1.result()));
-
-    //         });
-    //         routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
-    //     }
-    // });
-  }
+    }
     private void updateEmail(RoutingContext routingContext){
         Email email = Json.decodeValue(routingContext.getBodyAsJson().toBuffer(),Email.class);
         email.setEmailId(Long.parseLong(routingContext.request().getParam("id")));
@@ -219,15 +202,82 @@ public class ServerVerticle extends AbstractVerticle {
         });    
     }
 
+
+    
+
+
     private void deleteEmail(RoutingContext routingContext){
         Long emailId = Long.parseLong(routingContext.request().getParam("id"));
-        this.emailController.deleteEmail(1L, emailId).onComplete(ar -> {
-            if(ar.succeeded())
-                routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
-            else
-                routingContext.response().end(Json.encodePrettily(ar.cause()));
+        List<File> files = new ArrayList<File>();
+        this.emailFileController.getEmailFiles(1l, emailId).onComplete(ar ->{
+            if(ar.succeeded()){
+                for (EmailFile emailFile : ar.result()) {
+                    this.fileController.deleteFile(1L, emailFile.getFileId()).onComplete(ar2 ->{
+                        if(ar2.failed()){
+                            routingContext.response().end(Json.encodePrettily(ar2.cause()));
+                        }
+                    });
+                    this.emailFileController.deleteEmailFile(1L, emailFile.getEmailFileId()).onComplete(ar3 ->{
+                        if(ar3.failed()){
+                            routingContext.response().end(Json.encodePrettily(ar3.cause()));
+                        }
+                    });
+                }
+                this.emailController.deleteEmail(1L, emailId).onComplete(ar4 ->{
+                    if(ar4.succeeded()){
+                        routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar4.result()));
+                    }
+                });
+
+            }        
         });
     }
+    //     this.emailFileController.getEmailFileList(1L, emailId).onComplete(ar ->{
+    //         if(ar.succeeded()){
+    //             for(Long emailFileId : ar.result()){
+    //                 this.emailFileController.deleteEmailFile(1L, emailFileId).onComplete(ar4 ->{
+    //                     if(ar4.succeeded()){
+    //                         routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar4.result()));
+    //                     }
+    //                 });
+    //             }
+    //         }
+            
+    //         if(ar.succeeded()){
+    //             for(Long fileId : ar.result()){
+    //                 this.fileController.deleteFile(1L, fileId).onComplete(ar1 ->{
+    //                     if(ar1.succeeded()){
+    //                         files.remove(ar1.result());
+    //                         this.emailController.deleteEmail(1L, emailId).onComplete(ar2 ->{
+    //                             if(ar2.succeeded()){
+    //                                 routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar2.result()));
+    //                             }
+    //                         });  
+    //                     }
+    //                     else{
+    //                         routingContext.response().end(Json.encodePrettily(ar.cause()));
+    //                     }
+    //                 });
+    //             }
+    //         }
+
+           
+    //         else{
+    //             routingContext.response().end(Json.encodePrettily(ar.cause()));
+    //         }
+    //     });
+        
+    // }
+
+    // private void deleteEmail(RoutingContext routingContext){
+    //     Long emailId = Long.parseLong(routingContext.request().getParam("id"));
+    //     this.emailController.deleteEmail(1L, emailId).onComplete(ar -> {
+    //         if(ar.succeeded())
+    //             routingContext.response().setStatusCode(201).end(Json.encodePrettily(ar.result()));
+    //         else
+    //             routingContext.response().end(Json.encodePrettily(ar.cause()));
+    //     });
+    // }
 
     private void addEmailFile(RoutingContext routingContext){
         EmailFile emailFile = Json.decodeValue(routingContext.getBodyAsJson().toBuffer(),EmailFile.class);

@@ -84,7 +84,7 @@ public class EmailPgClient {
         pgPool.preparedQuery("SELECT email_update AS email_id FROM registration.email_update($1,$2,$3);")
         .execute(Tuple.of(loginId, email.getEmailId(),email.getEmailAddress()), ar ->{
                 if(ar.succeeded()){
-                    System.out.println("Got " + ar.result().size() + " rows");
+                    System.out.println("Get " + ar.result().size() + " rows");
                     for (Row row : ar.result()) {
                         promise.complete(row.getLong("email_id"));
                     }
@@ -101,7 +101,7 @@ public class EmailPgClient {
         pgPool.preparedQuery("SELECT email_delete AS email_id FROM registration.email_delete($1, $2);")
         .execute(Tuple.of(loginId, emailId), ar ->{
             if(ar.succeeded()){
-                System.out.println("Got "+ar.result().size() + " rows");
+                System.out.println("Get "+ar.result().size() + " rows");
                 for(Row row : ar.result()){
                     promise.complete(row.getLong("email_id"));
                 }

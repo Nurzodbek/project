@@ -33,7 +33,11 @@ public class EmailFileController {
     public Future<Long> updateEmailFile(Long loginId,EmailFile emailFile){
         return emailFilePgClient.updateEmailFileCommand(loginId,emailFile);
     }
-    public Future<Long> deleteEmailFile(Long loginId ,Long emailFileId){
+    public Future<List<Long>> deleteEmailFile(Long loginId ,Long emailFileId){
         return emailFilePgClient.deleteEmailFileCommand(loginId, emailFileId);
     }
+
+	public Future<List<EmailFile>> getEmailFiles(long l, Long emailId) {
+        return emailFilePgClient.getEmailFiles(l,emailId);
+	}
 }

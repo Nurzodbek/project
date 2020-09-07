@@ -78,7 +78,7 @@ public class EmailFilePgClient {
         return emailFile;
     }
 
-    public Future<List<Long>> getEmailFileIdCommand(Long loginId,Long emailId){
+    public Future<List<Long>>  getEmailFileIdCommand(Long loginId,Long emailId){
         Promise<List<Long>> promise = Promise.promise();
         pgPool.preparedQuery("SELECT * FROM registration.email_file_getid($1,$2);")
         .execute(Tuple.of(loginId, emailId),
@@ -88,7 +88,7 @@ public class EmailFilePgClient {
                 List<Long> ids = new ArrayList<Long>();
                 for (Row row : ar.result()) {
                     EmailFile emailFile = createEmailFileRows(row);
-                    ids.add(emailFile.getFileId());
+                    ids.add(emailFile.getFileId());     
                 }
                 promise.complete(ids);
             }else{
@@ -124,9 +124,10 @@ public class EmailFilePgClient {
                 System.out.println("Get " +ar.result().size() + " rows");
                 List<Long> idsList = new ArrayList<Long>();
                 for (Row row : ar.result()){
-                    idsList.remove(row.getLong("file_id")); 
-                    promise.complete(idsList);
+                    EmailFile emailFile = createEmailFileRows(row);
+                    idsList.remove(emailFile.getEmailFileId());    
                 }
+                promise.complete(idsList);
             }else
                 promise.fail(ar.cause());
         });
@@ -134,6 +135,25 @@ public class EmailFilePgClient {
         return promise.future();
     }
 
+	public Future<List<EmailFile>> getEmailFiles(long l, Long emailId) {
+        Promise<List<EmailFile>> promise = Promise.promise();
+        pgPool.preparedQuery("SELECT * FROM registration.email_file_getid($1,$2);")
+        .execute(Tuple.of(l, emailId),
+        ar -> {
+            if(ar.succeeded()){
+                System.out.println("Get " + ar.result().size() + " rows");
+                List<EmailFile> ids = new ArrayList<EmailFile>();
+                for (Row row : ar.result()) {
+                    EmailFile emailFile = createEmailFileRows(row);
+                    ids.add(emailFile);     
+                }
+                promise.complete(ids);
+            }else{
+                promise.fail(ar.cause());
+            }   
+            });
+        return promise.future();
+        }
 
 }    
 
