@@ -21,7 +21,7 @@ public class FileController {
     }
 
     public Future<File> getFile(Long loginId,Long fileId){
-        System.out.println(filePgClient.getFileCommand(loginId, fileId).result());
+
         return  filePgClient.getFileCommand(loginId, fileId);
     }
 

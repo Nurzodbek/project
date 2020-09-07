@@ -58,7 +58,7 @@ public class EmailFilePgClient {
                     System.out.println("Get " +ar.result().size() + " rows");
                     for (Row row : ar.result()){
                         EmailFile emailFile = createEmailFileRows(row);
-                        promise.complete();
+                        promise.complete(emailFile);
                     }
                     if(promise.tryComplete()){
 
@@ -85,16 +85,15 @@ public class EmailFilePgClient {
         ar -> {
             if(ar.succeeded()){
                 System.out.println("Get " + ar.result().size() + " rows");
-                ArrayList<Long> ids = new ArrayList<Long>();
+                List<Long> ids = new ArrayList<Long>();
                 for (Row row : ar.result()) {
                     EmailFile emailFile = createEmailFileRows(row);
                     ids.add(emailFile.getFileId());
                 }
-                System.out.println(ids);
                 promise.complete(ids);
             }else{
                 promise.fail(ar.cause());
-                }   
+            }   
             });
         return promise.future();
     }
@@ -117,14 +116,16 @@ public class EmailFilePgClient {
     }
     
 
-    public Future<Long> deleteEmailFileCommand(Long loginId,Long emailFileId){
-        Promise<Long> promise = Promise.promise();
+    public Future<List<Long>> deleteEmailFileCommand(Long loginId,Long emailFileId){
+        Promise<List<Long>> promise = Promise.promise();
         pgPool.preparedQuery("SELECT email_file_delete AS email_file_id FROM registration.email_file_delete($1,$2);")
         .execute(Tuple.of(loginId, emailFileId), ar ->{
             if(ar.succeeded()){
-                System.out.println("Got " +ar.result().size() + "rows");
+                System.out.println("Get " +ar.result().size() + " rows");
+                List<Long> idsList = new ArrayList<Long>();
                 for (Row row : ar.result()){
-                    promise.complete(row.getLong("email_file_id"));
+                    idsList.remove(row.getLong("file_id")); 
+                    promise.complete(idsList);
                 }
             }else
                 promise.fail(ar.cause());
