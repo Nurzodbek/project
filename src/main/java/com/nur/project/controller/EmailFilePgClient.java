@@ -107,7 +107,7 @@ public class EmailFilePgClient {
             if(ar.succeeded()){
                 System.out.println("Got " + ar.result().size() + " rows");
                 for (Row row : ar.result()) {
-                    promise.complete(row.getLong("email_file_id"));
+                    promise.complete(row.getLong("file_id"));
                 }
             }else
                 promise.fail(ar.cause());
